@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.briup.Dao.IMemberDao">
+	<resultMap type="Memberinfo" id="MemberinfoResult">
+		<id property="id" column="mid"/>
+		<result property="nickName" column="nickname"/>
+		<result property="passwd" column="password"/>
+		<result property="gender" column="gender"/>
+		<result property="age" column="age"/>
+		<result property="email" column="email"/>
+		<result property="provinceCity" column="provincecity"/>
+		<result property="address" column="address"/>
+		<result property="phone" column="phone"/>
+		<result property="passwdQuestion" column="passwordquestion"/>
+		<result property="passwdAnswer" column="passwordanswer"/>
+		<result property="recommender" column="recommender"/>
+		<result property="point" column="point"/>
+		<result property="registerdate" column="registerdate"/>
+		<result property="latestdate" column="latestdate"/>
+		<result property="status" column="status"/>
+		<result property="isonline" column="isonline"/>
+		<association property="graderecord" resultMap="GraderecordResult"></association>
+	</resultMap>
+	
+	<resultMap type="Graderecord" id="GraderecordResult">
+		<id property="id" column="gid"/>
+		<result property="minpoint" column="minpoint"/>
+		<result property="maxpoint" column="maxpoint"/>
+		<result property="gradename" column="gradename"/>
+		<result property="iconpath" column="iconpath"/>
+	</resultMap>
+	
+	<insert id="saveOrUpdateMemberinfo" useGeneratedKeys="false" keyProperty="id"  parameterType="com.briup.Bean.Memberinfo">
+		<selectKey order="BEFORE" resultType="long" keyProperty="id">
+			select SEQ_COMMON.nextval from dual
+		</selectKey>
+		insert into memberinfo(id,nickname,password,gender,age,email,provincecity,address,
+			phone,passwordquestion,passwordanswer,recommender,point,registerdate,gradeid)
+		values(#{id},#{nickName},#{passwd},#{gender},#{age},#{email},#{provinceCity},#{address},
+			#{phone},#{passwdQuestion},#{passwdAnswer},#{recommender},#{point},#{registerdate},#{graderecord.id}) 
+	</insert>
+	
+	<select id="findMemberinfoByName" parameterType="String" resultMap="MemberinfoResult">
+		select m.id mid,nickname,password,gender,age,email,provincecity,address,phone,passwordquestion,
+			passwordanswer,recommender,point,registerdate,latestdate,status,isonline,g.id gid,minpoint,
+			maxpoint,gradename,iconpath
+		from memberinfo m,graderecord g
+		where g.id=m.gradeid and m.nickname=#{name}
+	</select>
+	
+	<select id="findMemberinfoPoint" parameterType="String" resultType="Long">
+		select point from memberinfo where nickname=#{name}
+	</select>
+	
+	<!-- 跟新用户积分 -->
+	<update id="updateMemberinfoPoint">
+		update memberinfo set point=#{param1} where nickname=#{param2}
+	</update>
+	
+	<!-- 查询用户最后一次登录时间 -->
+	<select id="findLastDate" resultType="String">
+		select latestdate from memberinfo where nickname=#{param1}
+	</select>
+	
+	<!-- 跟新用户最后一次登录时间 -->
+	<update id="updateLastDate">
+		update memberinfo set latestdate=#{param2} where nickname=#{param1}
+	</update>
+	
+	<!-- 查询动作获取多少积分 -->
+	<select id="findPointaction" parameterType="String" resultType="Pointaction">
+		select * from pointaction where actionname=#{actionName}
+	</select>
+	
+	<!--保存用户的加分记录  -->
+	<insert id="savePointrecord" keyProperty="id"  parameterType="com.briup.Bean.Pointrecord">
+		<selectKey order="BEFORE" resultType="long" keyProperty="id">
+			select record_id.nextval from dual
+		</selectKey>
+		insert into pointrecord(id,nickname,receivedate,pointactionid)
+		values(#{id},#{nickname},#{receivedate},#{pointaction.id})
+	</insert>
+	
+	<!-- 根据当前积分获取等级 -->
+	<select id="findGradeBypoint" parameterType="Long" resultType="com.briup.Bean.Graderecord">
+		select * from graderecord
+		where #{point} between minpoint and maxpoint
+	</select>
+	
+	<!-- 跟新用户状态信息 -->
+	<update id="updateMemberInfoStatus">
+		update memberinfo set status=#{param1},isonline=#{param2} where nickname=#{param3}
+	</update>
+	<!-- 获取在线人数 -->
+	<select id="findIsonlineSum" resultType="int">
+		select count(id) from memberinfo where isonline=1
+	</select>
+	<!--跟新memeberinfo表中的等级id  -->
+	<update id="updateGradeId">
+		update memberinfo set gradeid=#{param1} where nickname=#{param2}
+	</update>
+</mapper>

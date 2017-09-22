@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+        http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<!-- 自动注册相关bean,用以支持SpringMVC的注解 -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+	<!-- 扫描哪个包下面有Spring中加了注解的组件 例如我们的Controller -->
+	<context:component-scan base-package="com.briup.Web.controller"></context:component-scan>
+	<!-- 注册视图解析器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
+		<property name="prefix" value="/WEB-INF/jsp/"/>  
+		<property name="suffix" value=".jsp"/>  
+	</bean>
+	
+	<!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 --> 
+	<!-- 注意:bean的名字不要改,一定要叫multipartResolver --> 
+	<bean name="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+	    <property name="defaultEncoding" value="UTF-8"/> 
+	    <!-- 指定所上传文件的总大小不能超过指定字节大小 --> 
+	    <property name="maxUploadSize" value="20000000"/>
+	</bean>
+	
+	<!-- 注册拦截器 -->
+	<bean name="autoLoginIntercepter" class="com.briup.Web.intecepter.AutoLoginIntercepter"></bean>
+	<bean name="spaceIntercepter" class="com.briup.Web.intecepter.SpaceIntercepter"></bean>
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor> 
+			<mvc:mapping path="/login"/>
+			<ref bean="autoLoginIntercepter"/>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/space"/>
+			<ref bean="spaceIntercepter"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	<!-- 处理静态资源的访问 -->
+	<mvc:resources mapping="/images/**" location="/images/"/>  
+	<mvc:resources mapping="/js/**" location="/js/"/>  
+	<mvc:resources mapping="/style/**" location="/style/"/> 
+	<mvc:resources mapping="/upload/**" location="/upload/"/>
+	
+	<mvc:view-controller path="/register" view-name="register"/>
+	<mvc:view-controller path="/login" view-name="login"/>
+	<mvc:view-controller path="/activity" view-name="activity"/>
+	<mvc:view-controller path="/noSpace" view-name="noSpace"/>
+	<mvc:view-controller path="/createSpace" view-name="createSpace"/>
+	<mvc:view-controller path="/space" view-name="space"/>
+	<mvc:view-controller path="/modify" view-name="modify"/>
+</beans>
+
+
+

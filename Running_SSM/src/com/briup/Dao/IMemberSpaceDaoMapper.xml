@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.briup.Dao.IMemberSpaceDao">
+	<resultMap type="com.briup.Bean.Memberspace" id="MemberspaceResult">
+		<id property="id" column="id"/>
+		<result property="opinion" column="opinion"/>
+		<result property="runtime" column="runtime"/>
+		<result property="runplace" column="runplace"/>
+		<result property="runstar" column="runstar"/>
+		<result property="runhabit" column="runhabit"/>
+		<result property="cellphone" column="cellphone"/>
+		<result property="icon" column="icon"/>
+	</resultMap>
+
+	<insert id="SaveMemberspace" useGeneratedKeys="false" keyProperty="id" parameterType="com.briup.Bean.Memberspace">
+		<selectKey order="BEFORE" resultType="long" keyProperty="id">
+			select space_id.nextval from dual
+		</selectKey>
+		insert into memberspace(id,opinion,runtime,runplace,runstar,runhabit,cellphone,icon,memberid)
+			values(#{id},#{opinion},#{runtime},#{runplace},#{runstar},#{runhabit},#{cellphone},#{icon},#{memberinfo.id})
+	</insert>
+	
+	<select id="findMemberspace" parameterType="Long" resultType="com.briup.Bean.Memberspace">
+		select id,opinion,runtime,runplace,runstar,runhabit,cellphone,icon
+		from memberspace
+		where memberid=#{param1}
+	</select>
+</mapper>
